@@ -74,13 +74,14 @@ def sigma():
         "links": []
     }
 
-    SQL = "SELECT songs.id, songs.title, COUNT(transitions.song_from) FROM songs LEFT OUTER JOIN transitions ON songs.id = transitions.song_from GROUP BY songs.id"
+    SQL = "SELECT songs.id, songs.title, artists.name, COUNT(transitions.song_to) AS weight FROM songs LEFT OUTER JOIN transitions ON songs.id = transitions.song_to LEFT JOIN artists ON artists.id = songs.artist_id GROUP BY songs.id, artists.name ORDER BY weight DESC"
     cursor.execute(SQL)
     for song in cursor.fetchall():
         data["nodes"].append({
             "id": song[0],
-            "label": song[1],
-            "weight": song[2],
+            "title": song[1],
+            "artist": song[2],
+            "weight": song[3],
         })
 
     SQL = "SELECT song_from, song_to FROM Transitions"

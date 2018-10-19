@@ -41,6 +41,8 @@
       <li>Number of Artists: <span>{{ number_of_artists }}</span></li>
       <li>Number of Djs: <span>{{ number_of_djs }}</span></li>
       <li>Number of Sets: <span>{{ number_of_sets }}</span></li>
+      <br />
+      <li>Selected: <span id="selected"></span></li>
     </ul>
 
     <canvas width="1920" height="1080"></canvas>
@@ -103,7 +105,9 @@
       }
 
       function dragsubject() {
-        return simulation.find(d3.event.x, d3.event.y);
+        var subject = simulation.find(d3.event.x, d3.event.y);
+        document.getElementById("selected").innerHTML = subject.title + " - " + subject.artist
+        return subject
       }
     });
 
@@ -135,7 +139,7 @@
     }
 
     function nodeSize(d) {
-      return 1 + d.weight * d.weight
+      return 1 + d.weight * 1.5
     }
 
     </script>
