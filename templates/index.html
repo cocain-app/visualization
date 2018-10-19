@@ -65,7 +65,7 @@
     var manyBody = d3.forceManyBody()
         .distanceMax(100)
         .strength(function(d) {
-          return -100
+          return -100 - d.weight * 4
         })
 
     var simulation = d3.forceSimulation()
