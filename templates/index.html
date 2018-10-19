@@ -8,6 +8,7 @@
         margin: 0;
         width: 100%;
         height: 100%;
+        background: #fff;
       }
 
       ul {
@@ -18,10 +19,11 @@
       li {
         margin: 0 auto;
         font-family: sans-serif;
+        color: #20273c;
       }
 
       li span {
-        color: #9777fb;
+        font-weight: bold;
       }
 
       canvas {
@@ -94,13 +96,16 @@
 
         context.beginPath();
         graph.links.forEach(drawLink);
-        context.strokeStyle = "rgba(0,0,0,0.1)";
+        context.strokeStyle = "rgba(0,0,0,0.05)";
+        context.lineWidth = 1;
         context.stroke();
 
         context.beginPath();
         graph.nodes.forEach(drawNode);
+        context.fillStyle = "#20273c";
         context.fill();
         context.strokeStyle = "#fff";
+        context.lineWidth = 2;
         context.stroke();
       }
 
@@ -134,7 +139,7 @@
     }
 
     function drawNode(d) {
-      context.moveTo(d.x + 3, d.y);
+      context.moveTo(d.x + nodeSize(d), d.y);
       context.arc(d.x, d.y, nodeSize(d), 0, 2 * Math.PI);
     }
 
