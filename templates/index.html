@@ -69,7 +69,7 @@
         .force("charge", manyBody)
         .force("center", d3.forceCenter(width / 2, height / 2));
 
-    d3.json("http://127.0.0.1:5000/sigma", function(error, graph) {
+    d3.json("/sigma", function(error, graph) {
       if (error) throw error;
 
       simulation
