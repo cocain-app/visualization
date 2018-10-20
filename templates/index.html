@@ -61,21 +61,29 @@
         width = canvas.width,
         height = canvas.height;
 
-
-    var manyBody = d3.forceManyBody()
-        .distanceMin(10)
-        .distanceMax(200)
-        .strength(function(d) {
-          return -5 - d.weight * 2
-        })
-
     var simulation = d3.forceSimulation()
-        .force("link", d3.forceLink().id(function(d) { return d.id; }))
-        .force("charge", manyBody)
-        .force("center", d3.forceCenter(width / 2, height / 2))
-        .force("collision", d3.forceCollide().radius(function(d) {
-          return d.weight * 1.5 + 5
-        }));
+        .force(
+          "link",
+          d3.forceLink()
+            .id(function(d) { return d.id; })
+            .strength(1)
+        )
+        .force(
+          "charge",
+          d3.forceManyBody()
+            .distanceMin(10)
+            .distanceMax(200)
+            .strength(-10)
+        )
+        .force(
+          "center",
+          d3.forceCenter(width / 2, height / 2)
+        )
+        .force(
+          "collision",
+          d3.forceCollide()
+          .radius(function(d) { return d.weight * 1.5 + 5 })
+        );
 
     d3.json("/sigma", function(error, graph) {
       if (error) throw error;
