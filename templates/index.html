@@ -63,15 +63,19 @@
 
 
     var manyBody = d3.forceManyBody()
-        .distanceMax(100)
+        .distanceMin(10)
+        .distanceMax(200)
         .strength(function(d) {
-          return -100 - d.weight * 4
+          return -5 - d.weight * 2
         })
 
     var simulation = d3.forceSimulation()
         .force("link", d3.forceLink().id(function(d) { return d.id; }))
         .force("charge", manyBody)
-        .force("center", d3.forceCenter(width / 2, height / 2));
+        .force("center", d3.forceCenter(width / 2, height / 2))
+        .force("collision", d3.forceCollide().radius(function(d) {
+          return d.weight * 1.5 + 5
+        }));
 
     d3.json("/sigma", function(error, graph) {
       if (error) throw error;
@@ -104,7 +108,7 @@
         graph.nodes.forEach(drawNode);
         context.fillStyle = "#20273c";
         context.fill();
-        context.strokeStyle = "#fff";
+        context.strokeStyle = "rgba(255,255,255,0.1)";
         context.lineWidth = 2;
         context.stroke();
       }
