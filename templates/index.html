@@ -71,9 +71,9 @@
         .force(
           "charge",
           d3.forceManyBody()
-            .distanceMin(10)
+            .distanceMin(25)
             .distanceMax(200)
-            .strength(-10)
+            .strength(-50)
         )
         .force(
           "center",
@@ -82,7 +82,8 @@
         .force(
           "collision",
           d3.forceCollide()
-          .radius(function(d) { return d.weight * 1.5 + 5 })
+          .radius(function(d) { return nodeSize(d) + 5 })
+          .strength(1)
         );
 
     d3.json("/sigma", function(error, graph) {
@@ -156,7 +157,7 @@
     }
 
     function nodeSize(d) {
-      return 1 + d.weight * 1.5
+      return 1 + d.weight
     }
 
     </script>
