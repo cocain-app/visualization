@@ -9,12 +9,12 @@
         width: 100%;
         height: 100%;
         background: #fff;
-        color: #20273c;
+        color: #000;
         font-family: sans-serif;
       }
 
       a {
-        color: #20273c;
+        color: #000;
       }
 
       h2 {
@@ -101,8 +101,27 @@
           stage.addChild(links);
 
           graph.nodes.forEach((node) => {
+
+              let color = 0x000000
+              if(node.bpm < 80) color = 0xF9F871
+              else if (node.bpm > 80 && node.bpm < 100) {
+                color = 0xFFC75F
+              }
+              else if (node.bpm > 100 && node.bpm < 120) {
+                color = 0xFF9671
+              }
+              else if (node.bpm > 120 && node.bpm < 140) {
+                color = 0xFF6F91
+              }
+              else if (node.bpm > 140 && node.bpm < 160) {
+                color = 0xD65DB1
+              }
+              else if (node.bpm > 160 && node.bpm < 180) {
+                color = 0x845EC2
+              }
+
               node.gfx = new PIXI.Graphics();
-              node.gfx.beginFill(0x20273c);
+              node.gfx.beginFill(color);
               node.gfx.lineStyle(1, 0xffffff, 0.1);
               node.gfx.drawCircle(0, 0, node.weight);
               stage.addChild(node.gfx);
