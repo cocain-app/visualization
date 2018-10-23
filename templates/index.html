@@ -17,16 +17,13 @@
         color: #000;
       }
 
-      h2 {
+      h2, h3 {
         margin: 0;
         margin-bottom: .25rem;
       }
 
       ul {
         list-style: none;
-        padding: 12px 20px;
-        z-index: 1000;
-        position: absolute;
       }
 
       li {
@@ -44,11 +41,53 @@
         top: 0;
         left: 0;
       }
+
+      #meta {
+        padding: 12px 20px;
+        z-index: 1000;
+        position: absolute;
+      }
+
+      #scale {
+        padding: 12px 20px;
+        float: right;
+        text-align: right;
+      }
+
+      #scale li {
+        padding: 2px 0;
+      }
+
+      #scale li:nth-of-type(1) {
+        background: #F9F871;
+      }
+
+      #scale li:nth-of-type(2) {
+        background: #FFC75F;
+      }
+
+      #scale li:nth-of-type(3) {
+        background: #FF9671;
+      }
+
+      #scale li:nth-of-type(4) {
+        background: #FF6F91;
+      }
+
+      #scale li:nth-of-type(5) {
+        background: #D65DB1;
+      }
+
+      #scale li:nth-of-type(6) {
+        background: #845EC2;
+      }
+
+
     </style>
   </head>
   <body>
 
-    <ul>
+    <ul id="meta">
       <h2>Database Stats:</h2>
       <li>Number of Songs: <span>{{ number_of_songs }}</span></li>
       <li>Number of Transitions: <span>{{ number_of_transitions }}</span></li>
@@ -57,6 +96,16 @@
       <li>Number of Sets: <span>{{ number_of_sets }}</span></li>
       <br />
       <li>Selected: <a target="_blank" id="selected"></a></li>
+    </ul>
+
+    <ul id="scale">
+      <h3>BPM Scale</h3>
+      <li>< 80</li>
+      <li>80 - 100</li>
+      <li>100 - 120</li>
+      <li>120 - 140</li>
+      <li>140 - 160</li>
+      <li>160 - 180</li>
     </ul>
 
     <script src="https://d3js.org/d3.v4.min.js"></script>
