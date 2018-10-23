@@ -9,6 +9,13 @@
         width: 100%;
         height: 100%;
         background: #fff;
+        color: #20273c;
+        font-family: sans-serif;
+      }
+
+      h2 {
+        margin: 0;
+        margin-bottom: .25rem;
       }
 
       ul {
@@ -18,8 +25,6 @@
 
       li {
         margin: 0 auto;
-        font-family: sans-serif;
-        color: #20273c;
       }
 
       li span {
@@ -38,6 +43,7 @@
   <body>
 
     <ul>
+      <h2>Database Stats:</h2>
       <li>Number of Songs: <span>{{ number_of_songs }}</span></li>
       <li>Number of Transitions: <span>{{ number_of_transitions }}</span></li>
       <li>Number of Artists: <span>{{ number_of_artists }}</span></li>
@@ -47,32 +53,29 @@
       <li>Selected: <span id="selected"></span></li>
     </ul>
 
-    <canvas width="1920" height="1080"></canvas>
-
     <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.7.1/pixi.min.js"></script>
     <script>
 
-    var canvas = document.querySelector("canvas")
+    let width = window.innerWidth, height = window.innerHeight;
 
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
+    let stage = new PIXI.Container();
+    let renderer = PIXI.autoDetectRenderer(width, height, {antialias: !0, transparent: !0, resolution: 1});
 
-    var context = canvas.getContext("2d"),
-        width = canvas.width,
-        height = canvas.height;
+    document.body.appendChild(renderer.view);
 
     var simulation = d3.forceSimulation()
         .force(
           "link",
           d3.forceLink()
             .id(function(d) { return d.id; })
-            .strength(1)
+            .strength(0.01)
         )
         .force(
           "charge",
           d3.forceManyBody()
             .distanceMin(25)
-            .distanceMax(200)
+            .distanceMax(100)
             .strength(-50)
         )
         .force(
@@ -82,12 +85,23 @@
         .force(
           "collision",
           d3.forceCollide()
-          .radius(function(d) { return nodeSize(d) + 5 })
+          .radius((d) => d.weight + 5)
           .strength(1)
         );
 
     d3.json("/sigma", function(error, graph) {
       if (error) throw error;
+
+      let links = new PIXI.Graphics();
+          stage.addChild(links);
+
+          graph.nodes.forEach((node) => {
+              node.gfx = new PIXI.Graphics();
+              node.gfx.beginFill(0x20273c);
+              node.gfx.lineStyle(1, 0xffffff, 0.1);
+              node.gfx.drawCircle(0, 0, node.weight);
+              stage.addChild(node.gfx);
+          });
 
       simulation
           .nodes(graph.nodes)
@@ -96,36 +110,39 @@
       simulation.force("link")
           .links(graph.links);
 
-      d3.select(canvas)
+      d3.select(renderer.view)
           .call(d3.drag()
-              .container(canvas)
+              .container(renderer.view)
               .subject(dragsubject)
               .on("start", dragstarted)
               .on("drag", dragged)
               .on("end", dragended));
 
       function ticked() {
-        context.clearRect(0, 0, width, height);
+          graph.nodes.forEach((node) => {
+              let { x, y, gfx } = node;
+              gfx.position = new PIXI.Point(x, y);
+          });
 
-        context.beginPath();
-        graph.links.forEach(drawLink);
-        context.strokeStyle = "rgba(0,0,0,0.05)";
-        context.lineWidth = 1;
-        context.stroke();
+          links.clear();
+          links.alpha = 0.6;
 
-        context.beginPath();
-        graph.nodes.forEach(drawNode);
-        context.fillStyle = "#20273c";
-        context.fill();
-        context.strokeStyle = "rgba(255,255,255,0.1)";
-        context.lineWidth = 2;
-        context.stroke();
+          graph.links.forEach((link) => {
+              let { source, target } = link;
+              links.lineStyle(link.weight, 0x3b476e, 0.3);
+              links.moveTo(source.x, source.y);
+              links.lineTo(target.x, target.y);
+          });
+
+          links.endFill();
+
+          renderer.render(stage);
       }
 
       function dragsubject() {
-        var subject = simulation.find(d3.event.x, d3.event.y);
-        document.getElementById("selected").innerHTML = subject.title + " - " + subject.artist
-        return subject
+          var subject = simulation.find(d3.event.x, d3.event.y);
+          document.getElementById("selected").innerHTML = subject.title + " - " + subject.artist
+          return subject
       }
     });
 
@@ -154,10 +171,6 @@
     function drawNode(d) {
       context.moveTo(d.x + nodeSize(d), d.y);
       context.arc(d.x, d.y, nodeSize(d), 0, 2 * Math.PI);
-    }
-
-    function nodeSize(d) {
-      return 1 + d.weight
     }
 
     </script>
