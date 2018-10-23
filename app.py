@@ -74,9 +74,11 @@ def sigma():
         "links": []
     }
 
-    SQL = "SELECT songs.id, songs.title, artists.name, count(songs.id) AS weight FROM songs JOIN (SELECT song_from AS song_id FROM transitions UNION ALL SELECT song_to AS song_id FROM transitions) AS U on u.song_id = songs.id JOIN artists ON songs.artist_id = artists.id GROUP BY songs.id, artists.name ORDER BY weight DESC"
+    SQL = "SELECT songs.id, songs.title, artists.name, count(songs.id) AS weight FROM songs JOIN artists ON songs.artist_id = artists.id INNER JOIN (SELECT song_from, song_to FROM Transitions INNER JOIN (SELECT songs.id as id FROM songs JOIN transitions on transitions.song_from = songs.id GROUP BY songs.id ORDER BY Count(songs.id) DESC LIMIT 500) AS U ON u.id = song_from) as u on u.song_from = songs.id GROUP BY songs.id, artists.name ORDER BY weight DESC LIMIT 500"
     cursor.execute(SQL)
+    song_ids = []
     for song in cursor.fetchall():
+        song_ids.append(song[0])
         data["nodes"].append({
             "id": song[0],
             "title": song[1],
@@ -84,12 +86,14 @@ def sigma():
             "weight": song[3],
         })
 
-    SQL = "SELECT song_from, song_to FROM Transitions"
+    SQL = "SELECT song_from, song_to, count(song_from) FROM Transitions INNER JOIN (SELECT songs.id as id FROM songs JOIN transitions on transitions.song_from = songs.id GROUP BY songs.id ORDER BY Count(songs.id) DESC LIMIT 500) AS U ON u.id = song_from GROUP BY song_from, song_to"
     cursor.execute(SQL)
     for index, transition in enumerate(cursor.fetchall()):
-        data["links"].append({
-            "source": transition[0],
-            "target": transition[1]
-        })
+        if(transition[0] in song_ids and transition[1] in song_ids):
+            data["links"].append({
+                "source": transition[0],
+                "target": transition[1],
+                "weight": transition[2]
+            })
 
     return jsonify(data)
