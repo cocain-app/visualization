@@ -13,6 +13,10 @@
         font-family: sans-serif;
       }
 
+      a {
+        color: #20273c;
+      }
+
       h2 {
         margin: 0;
         margin-bottom: .25rem;
@@ -21,13 +25,15 @@
       ul {
         list-style: none;
         padding: 12px 20px;
+        z-index: 1000;
+        position: absolute;
       }
 
       li {
         margin: 0 auto;
       }
 
-      li span {
+      li span, li a {
         font-weight: bold;
       }
 
@@ -50,7 +56,7 @@
       <li>Number of Djs: <span>{{ number_of_djs }}</span></li>
       <li>Number of Sets: <span>{{ number_of_sets }}</span></li>
       <br />
-      <li>Selected: <span id="selected"></span></li>
+      <li>Selected: <a target="_blank" id="selected"></a></li>
     </ul>
 
     <script src="https://d3js.org/d3.v4.min.js"></script>
@@ -69,14 +75,13 @@
           "link",
           d3.forceLink()
             .id(function(d) { return d.id; })
-            .strength(0.01)
+            .strength(0.5)
         )
         .force(
           "charge",
           d3.forceManyBody()
-            .distanceMin(25)
-            .distanceMax(100)
-            .strength(-50)
+            .distanceMax(400)
+            .strength(-20)
         )
         .force(
           "center",
@@ -141,13 +146,20 @@
 
       function dragsubject() {
           var subject = simulation.find(d3.event.x, d3.event.y);
-          document.getElementById("selected").innerHTML = subject.title + " - " + subject.artist
+
+          var selected = document.getElementById("selected")
+          selected.innerHTML = subject.title + " - " + subject.artist
+
+          if(subject.spotify_uri !== null) {
+            selected.href = "https://open.spotify.com/track/" + subject.spotify_uri.replace("spotify:track:", "")
+          }
+
           return subject
       }
     });
 
     function dragstarted() {
-      if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+      if (!d3.event.active) simulation.alphaTarget(0.01).restart();
       d3.event.subject.fx = d3.event.subject.x;
       d3.event.subject.fy = d3.event.subject.y;
     }
@@ -161,16 +173,6 @@
       if (!d3.event.active) simulation.alphaTarget(0);
       d3.event.subject.fx = null;
       d3.event.subject.fy = null;
-    }
-
-    function drawLink(d) {
-      context.moveTo(d.source.x, d.source.y);
-      context.lineTo(d.target.x, d.target.y);
-    }
-
-    function drawNode(d) {
-      context.moveTo(d.x + nodeSize(d), d.y);
-      context.arc(d.x, d.y, nodeSize(d), 0, 2 * Math.PI);
     }
 
     </script>

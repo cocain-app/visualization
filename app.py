@@ -74,7 +74,7 @@ def sigma():
         "links": []
     }
 
-    SQL = "SELECT songs.id, songs.title, artists.name, count(songs.id) AS weight FROM songs JOIN artists ON songs.artist_id = artists.id INNER JOIN (SELECT song_from, song_to FROM Transitions INNER JOIN (SELECT songs.id as id FROM songs JOIN transitions on transitions.song_from = songs.id GROUP BY songs.id ORDER BY Count(songs.id) DESC LIMIT 500) AS U ON u.id = song_from) as u on u.song_from = songs.id GROUP BY songs.id, artists.name ORDER BY weight DESC LIMIT 500"
+    SQL = "SELECT songs.id, songs.title, artists.name, count(songs.id), songs.spotify_uri AS weight FROM songs JOIN artists ON songs.artist_id = artists.id INNER JOIN (SELECT song_from, song_to FROM Transitions INNER JOIN (SELECT songs.id as id FROM songs JOIN transitions on transitions.song_from = songs.id GROUP BY songs.id ORDER BY Count(songs.id) DESC LIMIT 500) AS U ON u.id = song_from) as u on u.song_from = songs.id GROUP BY songs.id, artists.name ORDER BY weight DESC LIMIT 500"
     cursor.execute(SQL)
     song_ids = []
     for song in cursor.fetchall():
@@ -84,6 +84,7 @@ def sigma():
             "title": song[1],
             "artist": song[2],
             "weight": song[3],
+            "spotify_uri": song[4]
         })
 
     SQL = "SELECT song_from, song_to, count(song_from) FROM Transitions INNER JOIN (SELECT songs.id as id FROM songs JOIN transitions on transitions.song_from = songs.id GROUP BY songs.id ORDER BY Count(songs.id) DESC LIMIT 500) AS U ON u.id = song_from GROUP BY song_from, song_to"
