@@ -74,28 +74,37 @@ def sigma():
         "links": []
     }
 
-    SQL = "SELECT songs.id, songs.title, artists.name, count(songs.id), songs.spotify_uri AS weight, songs_bpm.bpm FROM songs JOIN artists ON songs.artist_id = artists.id JOIN songs_bpm ON songs_bpm.song_id = songs.id INNER JOIN (SELECT song_from, song_to FROM Transitions INNER JOIN (SELECT songs.id as id FROM songs JOIN transitions on transitions.song_from = songs.id GROUP BY songs.id ORDER BY Count(songs.id) DESC LIMIT 500) AS U ON u.id = song_from) as u on u.song_from = songs.id GROUP BY songs.id, artists.name, songs_bpm.bpm ORDER BY weight DESC LIMIT 500"
-    cursor.execute(SQL)
-    song_ids = []
-    for song in cursor.fetchall():
-        song_ids.append(song[0])
-        data["nodes"].append({
-            "id": song[0],
-            "title": song[1],
-            "artist": song[2],
-            "weight": song[3],
-            "spotify_uri": song[4],
-            "bpm": song[5]
-        })
+    SQL = "SELECT songs.id, songs.title, artists.name, count(songs.id) AS weight, spotify_songs.spotify_uri as uri, spotify_songs.tempo as bpm, spotify_songs.energy as energy FROM songs JOIN artists ON songs.artist_id = artists.id JOIN spotify_songs ON spotify_songs.song_id = songs.id INNER JOIN (SELECT song_from, song_to FROM Transitions INNER JOIN (SELECT songs.id as id FROM songs JOIN transitions on transitions.song_from = songs.id GROUP BY songs.id ORDER BY Count(songs.id) DESC LIMIT 500) AS U ON u.id = song_from) as u on u.song_from = songs.id GROUP BY songs.id, artists.name, uri ORDER BY weight DESC LIMIT 500"
+    try:
+        cursor.execute(SQL)
+        song_ids = []
+        for song in cursor.fetchall():
+            song_ids.append(song[0])
+            data["nodes"].append({
+                "id": song[0],
+                "title": song[1],
+                "artist": song[2],
+                "weight": song[3],
+                "spotify_uri": song[4],
+                "bpm": song[5],
+                "energy": song[6],
+            })
+    except Exception as e:
+        cursor.execute("ROLLBACK")
+        pass
 
     SQL = "SELECT song_from, song_to, count(song_from) FROM Transitions INNER JOIN (SELECT songs.id as id FROM songs JOIN transitions on transitions.song_from = songs.id GROUP BY songs.id ORDER BY Count(songs.id) DESC LIMIT 500) AS U ON u.id = song_from GROUP BY song_from, song_to"
-    cursor.execute(SQL)
-    for index, transition in enumerate(cursor.fetchall()):
-        if(transition[0] in song_ids and transition[1] in song_ids):
-            data["links"].append({
-                "source": transition[0],
-                "target": transition[1],
-                "weight": transition[2]
-            })
+    try:
+        cursor.execute(SQL)
+        for index, transition in enumerate(cursor.fetchall()):
+            if(transition[0] in song_ids and transition[1] in song_ids):
+                data["links"].append({
+                    "source": transition[0],
+                    "target": transition[1],
+                    "weight": transition[2]
+                })
+    except Exception as e:
+        cursor.execute("ROLLBACK")
+        pass
 
     return jsonify(data)
