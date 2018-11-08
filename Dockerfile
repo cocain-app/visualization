@@ -17,4 +17,4 @@ EXPOSE 5000
 
 # Run script
 SHELL ["/bin/bash", "-c"]
-CMD source database.secret.env && flask run --host=0.0.0.0
+CMD flask run --host=0.0.0.0
